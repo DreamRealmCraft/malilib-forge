@@ -1,0 +1,27 @@
+modLoader = "javafml"
+loaderVersion = "[43,)"
+license = "LGPLv3"
+
+[[mods]]
+modId = "malilib"
+version = "${version}"
+displayName = "MaLiLib for Forge"
+logoFile="icon.png"
+authors="masa, Huaji_MUR233"
+description = '''
+A library mod required by masa's client-side mods
+'''
+
+[[dependencies.malilib]]
+modId = "forge"
+mandatory = true
+versionRange = "[43,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.malilib]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[${minecraft_version}]"
+ordering = "NONE"
+side = "BOTH"
