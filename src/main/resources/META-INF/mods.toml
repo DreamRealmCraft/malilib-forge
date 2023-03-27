@@ -7,7 +7,7 @@ modId = "malilib"
 version = "${version}"
 displayName = "MaLiLib for Forge"
 logoFile="icon.png"
-authors="masa, Huaji_MUR233"
+authors="masa"
 description = '''
 A library mod required by masa's client-side mods
 '''
