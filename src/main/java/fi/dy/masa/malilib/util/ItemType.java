@@ -1,7 +1,7 @@
 package fi.dy.masa.malilib.util;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.Identifier;
 
 /**
@@ -87,12 +87,12 @@ public class ItemType
     {
         if (this.checkNBT())
         {
-            Identifier rl = Registries.ITEM.getId(this.stack.getItem());
+            Identifier rl = Registry.ITEM.getId(this.stack.getItem());
             return rl + " " + this.stack.getNbt();
         }
         else
         {
-            return Registries.ITEM.getId(this.stack.getItem()).toString();
+            return Registry.ITEM.getId(this.stack.getItem()).toString();
         }
     }
 }

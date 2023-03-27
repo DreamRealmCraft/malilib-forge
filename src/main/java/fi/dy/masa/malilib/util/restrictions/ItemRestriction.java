@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.Identifier;
 
 import fi.dy.masa.malilib.MaLiLib;
@@ -25,7 +25,7 @@ public class ItemRestriction extends UsageRestriction<Item>
             }
             catch (Exception ignore) {}
 
-            Item item = rl != null ? Registries.ITEM.get(rl) : null;
+            Item item = rl != null ? Registry.ITEM.get(rl) : null;
 
             if (item != null)
             {

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import net.minecraft.block.Block;
-import net.minecraft.registry.Registries;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.Identifier;
 
 import fi.dy.masa.malilib.MaLiLib;
@@ -25,7 +25,7 @@ public class BlockRestriction extends UsageRestriction<Block>
             }
             catch (Exception ignore) {}
 
-            Block block = rl != null ? Registries.BLOCK.get(rl) : null;
+            Block block = rl != null ? Registry.BLOCK.get(rl) : null;
 
             if (block != null)
             {

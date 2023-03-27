@@ -3,12 +3,10 @@ package fi.dy.masa.malilib.render;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import javax.annotation.Nullable;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShulkerBoxBlock;
@@ -42,10 +40,11 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+import net.minecraft.util.math.Matrix4f;
+import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.math.random.LocalRandom;
-
 import fi.dy.masa.malilib.config.HudAlignment;
 import fi.dy.masa.malilib.gui.GuiBase;
 import fi.dy.masa.malilib.util.Color4f;
@@ -159,7 +158,7 @@ public class RenderUtils
         float g = (float) (color >>  8 & 255) / 255.0F;
         float b = (float) (color & 255) / 255.0F;
 
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         RenderSystem.applyModelViewMatrix();
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
@@ -181,7 +180,7 @@ public class RenderUtils
     public static void drawTexturedRect(int x, int y, int u, int v, int width, int height, float zLevel)
     {
         float pixelWidth = 0.00390625F;
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.applyModelViewMatrix();
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
@@ -296,8 +295,9 @@ public class RenderUtils
         int eg = (endColor >>  8 & 0xFF);
         int eb = (endColor & 0xFF);
 
+        RenderSystem.disableTexture();
         setupBlend();
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         RenderSystem.applyModelViewMatrix();
 
         Tessellator tessellator = Tessellator.getInstance();
@@ -312,6 +312,7 @@ public class RenderUtils
         tessellator.draw();
 
         RenderSystem.disableBlend();
+        RenderSystem.enableTexture();
     }
 
     public static void drawCenteredString(int x, int y, int color, String text, MatrixStack matrixStack)
@@ -366,8 +367,8 @@ public class RenderUtils
     }
 
     public static int renderText(int xOff, int yOff, double scale, int textColor, int bgColor,
-            HudAlignment alignment, boolean useBackground, boolean useShadow, List<String> lines,
-            MatrixStack matrixStack)
+                                 HudAlignment alignment, boolean useBackground, boolean useShadow, List<String> lines,
+                                 MatrixStack matrixStack)
     {
         TextRenderer fontRenderer = mc().textRenderer;
         final int scaledWidth = GuiUtils.getScaledWindowWidth();
@@ -557,7 +558,7 @@ public class RenderUtils
      * Assumes a BufferBuilder in GL_QUADS mode has been initialized
      */
     public static void drawBoxAllSidesBatchedQuads(double minX, double minY, double minZ, double maxX, double maxY, double maxZ,
-            Color4f color, BufferBuilder buffer)
+                                                   Color4f color, BufferBuilder buffer)
     {
         drawBoxHorizontalSidesBatchedQuads(minX, minY, minZ, maxX, maxY, maxZ, color, buffer);
         drawBoxTopBatchedQuads(minX, minZ, maxX, maxY, maxZ, color, buffer);
@@ -608,7 +609,7 @@ public class RenderUtils
      * Assumes a BufferBuilder in GL_QUADS mode has been initialized
      */
     public static void drawBoxHorizontalSidesBatchedQuads(double minX, double minY, double minZ, double maxX, double maxY, double maxZ,
-            Color4f color, BufferBuilder buffer)
+                                                          Color4f color, BufferBuilder buffer)
     {
         // West side
         buffer.vertex(minX, minY, minZ).color(color.r, color.g, color.b, color.a).next();
@@ -663,7 +664,7 @@ public class RenderUtils
      * Assumes a BufferBuilder in GL_LINES mode has been initialized
      */
     public static void drawBoxAllEdgesBatchedLines(double minX, double minY, double minZ, double maxX, double maxY, double maxZ,
-            Color4f color, BufferBuilder buffer)
+                                                   Color4f color, BufferBuilder buffer)
     {
         // West side
         buffer.vertex(minX, minY, minZ).color(color.r, color.g, color.b, color.a).next();
@@ -751,7 +752,8 @@ public class RenderUtils
         globalStack.push();
         globalStack.translate(x - cx, y - cy, z - cz);
 
-        Quaternionf rot = new Quaternionf().rotationYXZ(-yaw * (float) (Math.PI / 180.0), pitch * (float) (Math.PI / 180.0), 0.0F);
+        Quaternion rot = Vec3f.POSITIVE_Y.getDegreesQuaternion(-yaw);
+        rot.hamiltonProduct(Vec3f.POSITIVE_X.getDegreesQuaternion(pitch));
         globalStack.multiply(rot);
 
         globalStack.scale(-scale, -scale, scale);
@@ -759,8 +761,9 @@ public class RenderUtils
         RenderSystem.disableCull();
 
         setupBlend();
+        RenderSystem.disableTexture();
 
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
         int maxLineLen = 0;
@@ -790,6 +793,7 @@ public class RenderUtils
         buffer.vertex( strLenHalf    ,          -1, 0.0D).color(bgr, bgg, bgb, bga).next();
         tessellator.draw();
 
+        RenderSystem.enableTexture();
         int textY = 0;
 
         // translate the text a bit infront of the background
@@ -800,7 +804,7 @@ public class RenderUtils
         }
 
         Matrix4f modelMatrix = new Matrix4f();
-        modelMatrix.identity();
+        modelMatrix.loadIdentity();
 
         for (String line : text)
         {
@@ -809,14 +813,14 @@ public class RenderUtils
                 RenderSystem.depthMask(false);
                 RenderSystem.disableDepthTest();
                 VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(buffer);
-                textRenderer.draw(line, -strLenHalf, textY, 0x20000000 | (textColor & 0xFFFFFF), false, modelMatrix, immediate, TextRenderer.TextLayerType.NORMAL, 0, 15728880);
+                textRenderer.draw(line, -strLenHalf, textY, 0x20000000 | (textColor & 0xFFFFFF), false, modelMatrix, immediate, true, 0, 15728880);
                 immediate.draw();
                 RenderSystem.enableDepthTest();
                 RenderSystem.depthMask(true);
             }
 
             VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(buffer);
-            textRenderer.draw(line, -strLenHalf, textY, textColor, false, modelMatrix, immediate, TextRenderer.TextLayerType.NORMAL, 0, 15728880);
+            textRenderer.draw(line, -strLenHalf, textY, textColor, false, modelMatrix, immediate, true, 0, 15728880);
             immediate.draw();
             textY += textRenderer.fontHeight;
         }
@@ -834,7 +838,7 @@ public class RenderUtils
     }
 
     public static void renderBlockTargetingOverlay(Entity entity, BlockPos pos, Direction side, Vec3d hitVec,
-            Color4f color, MatrixStack matrixStack, MinecraftClient mc)
+                                                   Color4f color, MatrixStack matrixStack, MinecraftClient mc)
     {
         Direction playerFacing = entity.getHorizontalFacing();
         HitPart part = PositionUtils.getHitPart(side, playerFacing, pos, hitVec);
@@ -849,7 +853,8 @@ public class RenderUtils
         blockTargetingOverlayTranslations(x, y, z, side, playerFacing, globalStack);
         RenderSystem.applyModelViewMatrix();
 
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        RenderSystem.disableTexture();
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
@@ -941,7 +946,7 @@ public class RenderUtils
     }
 
     public static void renderBlockTargetingOverlaySimple(Entity entity, BlockPos pos, Direction side,
-            Color4f color, MatrixStack matrixStack, MinecraftClient mc)
+                                                         Color4f color, MatrixStack matrixStack, MinecraftClient mc)
     {
         Direction playerFacing = entity.getHorizontalFacing();
         Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
@@ -955,7 +960,7 @@ public class RenderUtils
 
         blockTargetingOverlayTranslations(x, y, z, side, playerFacing, globalStack);
         RenderSystem.applyModelViewMatrix();
-        RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
@@ -994,30 +999,30 @@ public class RenderUtils
     }
 
     private static void blockTargetingOverlayTranslations(double x, double y, double z,
-            Direction side, Direction playerFacing, MatrixStack matrixStack)
+                                                          Direction side, Direction playerFacing, MatrixStack matrixStack)
     {
         matrixStack.translate(x, y, z);
 
         switch (side)
         {
             case DOWN:
-                matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180f - playerFacing.asRotation()));
-                matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90f));
+                matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180f - playerFacing.asRotation()));
+                matrixStack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(90f));
                 break;
             case UP:
-                matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180f - playerFacing.asRotation()));
-                matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-90f));
+                matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180f - playerFacing.asRotation()));
+                matrixStack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(-90f));
                 break;
             case NORTH:
-                matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180f));
+                matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180f));
                 break;
             case SOUTH:
                 break;
             case WEST:
-                matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-90f));
+                matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90f));
                 break;
             case EAST:
-                matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90f));
+                matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(90f));
                 break;
         }
 
@@ -1043,7 +1048,7 @@ public class RenderUtils
             bindTexture(bgTexture);
             setupBlend();
 
-            RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.applyModelViewMatrix();
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder buffer = tessellator.getBuffer();
@@ -1158,8 +1163,8 @@ public class RenderUtils
 
         setupGuiTransform(x, y, model.hasDepth(), zLevel);
         //model.getItemCameraTransforms().applyTransform(ItemCameraTransforms.TransformType.GUI);
-        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(30));
-        matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(225));
+        matrixStack.multiply(new Quaternion(Vec3f.POSITIVE_X, 30, true));
+        matrixStack.multiply(new Quaternion(Vec3f.POSITIVE_Y, 225, true));
         matrixStack.scale(0.625f, 0.625f, 0.625f);
 
         renderModel(model, state);
@@ -1187,7 +1192,7 @@ public class RenderUtils
 
         if (model.isBuiltin() == false)
         {
-            RenderSystem.setShader(GameRenderer::getRenderTypeSolidProgram);
+            RenderSystem.setShader(GameRenderer::getRenderTypeSolidShader);
             RenderSystem.applyModelViewMatrix();
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder bufferbuilder = tessellator.getBuffer();

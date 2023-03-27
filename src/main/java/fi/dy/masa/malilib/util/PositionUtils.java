@@ -32,11 +32,11 @@ public class PositionUtils
         switch (type)
         {
             case X:
-                return BlockPos.ofFloored(valueIn.getX() + amount, valueIn.getY()         , valueIn.getZ()         );
+                return new BlockPos(valueIn.getX() + amount, valueIn.getY()         , valueIn.getZ()         );
             case Y:
-                return BlockPos.ofFloored(valueIn.getX()         , valueIn.getY() + amount, valueIn.getZ()         );
+                return new BlockPos(valueIn.getX()         , valueIn.getY() + amount, valueIn.getZ()         );
             case Z:
-                return BlockPos.ofFloored(valueIn.getX()         , valueIn.getY()         , valueIn.getZ() + amount);
+                return new BlockPos(valueIn.getX()         , valueIn.getY()         , valueIn.getZ() + amount);
         }
 
         return valueIn;
@@ -62,11 +62,11 @@ public class PositionUtils
         switch (type)
         {
             case X:
-                return BlockPos.ofFloored(newValue      , valueIn.getY(), valueIn.getZ());
+                return new BlockPos(newValue      , valueIn.getY(), valueIn.getZ());
             case Y:
-                return BlockPos.ofFloored(valueIn.getX(), newValue      , valueIn.getZ());
+                return new BlockPos(valueIn.getX(), newValue      , valueIn.getZ());
             case Z:
-                return BlockPos.ofFloored(valueIn.getX(), valueIn.getY(), newValue      );
+                return new BlockPos(valueIn.getX(), valueIn.getY(), newValue      );
         }
 
         return valueIn;
@@ -74,7 +74,7 @@ public class PositionUtils
 
     public static BlockPos getEntityBlockPos(Entity entity)
     {
-        return BlockPos.ofFloored(Math.floor(entity.getX()), Math.floor(entity.getY()), Math.floor(entity.getZ()));
+        return new BlockPos(Math.floor(entity.getX()), Math.floor(entity.getY()), Math.floor(entity.getZ()));
     }
 
     /**
@@ -132,7 +132,7 @@ public class PositionUtils
         double y = entity.getY();
         double z = entity.getZ();
         double w = entity.getWidth();
-        BlockPos pos = BlockPos.ofFloored(x, y, z);
+        BlockPos pos = new BlockPos(x, y, z);
 
         if (entity.getPitch() >= verticalThreshold)
         {
@@ -140,7 +140,7 @@ public class PositionUtils
         }
         else if (entity.getPitch() <= -verticalThreshold)
         {
-            return BlockPos.ofFloored(x, Math.ceil(entity.getBoundingBox().maxY), z);
+            return new BlockPos(x, Math.ceil(entity.getBoundingBox().maxY), z);
         }
 
         y = Math.floor(y + entity.getStandingEyeHeight());
@@ -148,13 +148,13 @@ public class PositionUtils
         switch (entity.getHorizontalFacing())
         {
             case EAST:
-                return BlockPos.ofFloored((int) Math.ceil( x + w / 2),     (int) y, (int) Math.floor(z));
+                return new BlockPos((int) Math.ceil( x + w / 2),     (int) y, (int) Math.floor(z));
             case WEST:
-                return BlockPos.ofFloored((int) Math.floor(x - w / 2) - 1, (int) y, (int) Math.floor(z));
+                return new BlockPos((int) Math.floor(x - w / 2) - 1, (int) y, (int) Math.floor(z));
             case SOUTH:
-                return BlockPos.ofFloored((int) Math.floor(x), (int) y, (int) Math.ceil( z + w / 2)    );
+                return new BlockPos((int) Math.floor(x), (int) y, (int) Math.ceil( z + w / 2)    );
             case NORTH:
-                return BlockPos.ofFloored((int) Math.floor(x), (int) y, (int) Math.floor(z - w / 2) - 1);
+                return new BlockPos((int) Math.floor(x), (int) y, (int) Math.floor(z - w / 2) - 1);
             default:
         }
 

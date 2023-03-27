@@ -62,7 +62,7 @@ public class InventoryOverlay
         RenderUtils.setupBlend();
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.applyModelViewMatrix();
         buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 
@@ -181,7 +181,7 @@ public class InventoryOverlay
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.applyModelViewMatrix();
         buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 
@@ -482,24 +482,28 @@ public class InventoryOverlay
 
     public static void renderStackAt(ItemStack stack, float x, float y, float scale, MinecraftClient mc)
     {
-        MatrixStack matrixStack = new MatrixStack();
-        matrixStack.translate(x, y, 0.f);
+        MatrixStack matrixStack = RenderSystem.getModelViewStack();
+        matrixStack.push();
+        matrixStack.translate(x, y, 0);
         matrixStack.scale(scale, scale, 1);
 
         RenderUtils.enableDiffuseLightingGui3D();
         RenderUtils.color(1f, 1f, 1f, 1f);
 
-        mc.getItemRenderer().renderInGui(matrixStack, stack, 0, 0);
+        mc.getItemRenderer().zOffset += 100;
+        mc.getItemRenderer().renderInGui(stack, 0, 0);
 
         RenderUtils.color(1f, 1f, 1f, 1f);
-        mc.getItemRenderer().renderGuiItemOverlay(matrixStack, mc.textRenderer, stack, 0, 0, null);
+        mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, stack, 0, 0, null);
+        mc.getItemRenderer().zOffset -= 100;
 
+        matrixStack.pop();
         RenderUtils.color(1f, 1f, 1f, 1f);
     }
 
     public static void renderStackToolTip(int x, int y, ItemStack stack, MinecraftClient mc, MatrixStack matrixStack)
     {
-        List<Text> list = stack.getTooltip(mc.player, mc.options.advancedItemTooltips ? TooltipContext.Default.ADVANCED : TooltipContext.Default.BASIC);
+        List<Text> list = stack.getTooltip(mc.player, mc.options.advancedItemTooltips ? TooltipContext.Default.ADVANCED : TooltipContext.Default.NORMAL);
         List<String> lines = new ArrayList<>();
 
         for (int i = 0; i < list.size(); ++i)

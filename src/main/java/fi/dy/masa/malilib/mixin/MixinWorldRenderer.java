@@ -1,6 +1,6 @@
 package fi.dy.masa.malilib.mixin;
 
-import org.joml.Matrix4f;
+import net.minecraft.util.math.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,7 +44,7 @@ public abstract class MixinWorldRenderer
                             to = @At(value = "INVOKE", ordinal = 1, // end at the second renderWeather call
                                      target = "Lnet/minecraft/client/render/WorldRenderer;renderWeather(Lnet/minecraft/client/render/LightmapTextureManager;FDDD)V")),
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/gl/PostEffectProcessor;render(F)V"))
+                    target = "Lnet/minecraft/client/gl/ShaderEffect;render(F)V"))
     private void onRenderWorldLastFabulous(
             MatrixStack matrices,
             float tickDelta, long limitTime, boolean renderBlockOutline,
