@@ -10,19 +10,17 @@ import javax.annotation.Nullable;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 import fi.dy.masa.malilib.MaLiLibConfigs;
+import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 
 public class StringUtils
 {
-    public static String getModVersionString(String modId)
-    {
-        for (net.fabricmc.loader.api.ModContainer container : net.fabricmc.loader.api.FabricLoader.getInstance().getAllMods())
-        {
-            if (container.getMetadata().getId().equals(modId))
-            {
-                return container.getMetadata().getVersion().getFriendlyString();
+    public static String getModVersionString(String modId) {
+        for (ModInfo info : FMLLoader.getLoadingModList().getMods()) {
+            if (info.getModId().equals(modId)) {
+                return info.getVersion().getQualifier();
             }
         }
-
         return "?";
     }
 
