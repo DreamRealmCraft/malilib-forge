@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[43,)"
+loaderVersion = "[47,)"
 license = "LGPLv3"
 
 [[mods]]
@@ -15,13 +15,13 @@ A library mod required by masa's client-side mods
 [[dependencies.malilib]]
 modId = "forge"
 mandatory = true
-versionRange = "[43,)"
+versionRange = "[47,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.malilib]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[${minecraft_version}]"
+versionRange = "[1.20,${minecraft_version}]"
 ordering = "NONE"
 side = "BOTH"
