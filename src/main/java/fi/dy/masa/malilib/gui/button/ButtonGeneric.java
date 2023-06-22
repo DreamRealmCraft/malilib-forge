@@ -103,8 +103,8 @@ public class ButtonGeneric extends ButtonBase
             if (this.renderDefaultBackground)
             {
                 this.bindTexture(BUTTON_TEXTURES);
-                RenderUtils.drawTexturedRect(this.x, this.y, 0, 46 + buttonStyle * 20, this.width / 2, this.height);
-                RenderUtils.drawTexturedRect(this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + buttonStyle * 20, this.width / 2, this.height);
+                RenderUtils.drawTexturedRect(this.x, this.y, 0, 46 + buttonStyle * 20, this.width / 2, this.height,zLevel);
+                RenderUtils.drawTexturedRect(this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + buttonStyle * 20, this.width / 2, this.height,zLevel);
             }
 
             if (this.icon != null)
@@ -115,7 +115,7 @@ public class ButtonGeneric extends ButtonBase
                 int u = this.icon.getU() + buttonStyle * this.icon.getWidth();
 
                 this.bindTexture(this.icon.getTexture());
-                RenderUtils.drawTexturedRect(x, y, u, this.icon.getV(), this.icon.getWidth(), this.icon.getHeight());
+                RenderUtils.drawTexturedRect(x, y, u, this.icon.getV(), this.icon.getWidth(), this.icon.getHeight(),zLevel);
             }
 
             if (StringUtils.isBlank(this.displayString) == false)

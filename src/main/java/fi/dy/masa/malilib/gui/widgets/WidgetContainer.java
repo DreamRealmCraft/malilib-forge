@@ -185,6 +185,7 @@ public abstract class WidgetContainer extends WidgetBase
         {
             for (WidgetBase widget : this.subWidgets)
             {
+                widget.setZLevel(zLevel);
                 widget.render(mouseX, mouseY, false, drawContext);
 
                 if (widget.isMouseOver(mouseX, mouseY))
